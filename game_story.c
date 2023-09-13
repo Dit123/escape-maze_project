@@ -2,6 +2,34 @@
 #include <string.h>
 #include "main.h"
 
+
+// Function to start the game
+void startGame() {
+    printf("Starting the game...\n");
+    // Place your game initialization and main game loop here
+}
+
+// Function to display game instructions
+void showInstructions() {
+    printf("\nGame Instructions:\n");
+    printf("Navigate through the maze to reach the exit point.\n");
+    printf("Use arrow keys to move your character.\n");
+    printf("Avoid obstacles and find the hidden path to escape!\n");
+    printf("\n");
+}
+
+// Function to display information about the game
+void displayGameInfo() {
+    printf("\nAbout the Game:\n");
+    printf("'Escape the Maze' is an exciting adventure game where you must navigate through a complex maze to reach safety.\n");
+    printf("Enjoy hours of fun as you solve puzzles and overcome obstacles.\n");
+    printf("\n");
+}
+
+// Function to exit the game
+void exitGame() {
+    printf("Exiting the game. Goodbye!\n");
+}
 int main() {
     printf("Welcome to 'Escape the Maze'!\n");
     printf("\n");
