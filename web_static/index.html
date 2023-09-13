@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+i<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escape the Maze</title>
-    <link rel="stylesheet" href="css/style.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <header>
@@ -16,13 +16,23 @@
         <div id="game-container">
             <!-- Maze, game instructions, and other content -->
         </div>
+	<section>
+            <h2>Audio Section</h2>
+            <audio id="myAudio" src="audio/mySound.mp3" preload="auto"></audio>
+        </section>
+	<section id="how-to-play">
+        <h2>How to Play</h2>
+        <p>Navigate through the maze to reach the exit point. Use the arrow keys to move your character.</p>
+        <p>Avoid obstacles and find the hidden path to escape!</p>
+    </section>
     </main>
 
     <footer>
         <p>&copy; 2023 Your Maze Game</p>
     </footer>
 
-    <script src="js/script.js"></script> <!-- Link to your JavaScript file -->
+    <script src="gameScript.js"></script>
+
 </body>
 </html>
 
