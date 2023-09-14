@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "cJSON.h"
+#include "main.h"
+
+// Define the size of the maze
+#define MAZE_WIDTH 10
+#define MAZE_HEIGHT 10
+
+int main() {
+    // JSON data representing the maze (replace with your JSON data)
+    const char* json_data = "{\"maze\":[[\"S\",\" \",\"#\",\"#\",\" \",\"#\",\" \",\" \",\" \",\"E\"],[\"#\",\" \",\" \",\" \",\" \",\" \",\" \",\"#\",\"#\",\" \"],[\"#\",\" \",\"#\",\"#\",\" \",\" \",\" \",\" \",\" \",\" \"],[\"#\",\" \",\" \",\" \",\" \",\"#\",\"#\",\" \",\" \",\" \"],[\"#\",\"#\",\"#\",\"#\",\" \",\" \",\" \",\" \",\" \",\" \"],[\"#\",\" \",\" \",\" \",\" \",\" \",\" \",\"#\",\"#\",\" \"],[\"#\",\" \",\"#\",\" \",\" \",\" \",\" \",\" \",\" \",\" \"],[\"#\",\" \",\"#\",\" \",\"#\",\"#\",\" \",\"#\",\" \",\" \"],[\"#\",\" \",\" \",\" \",\" \",\" \",\" \",\"#\",\" \",\" \"],[\"#\",\"#\",\"#\",\"#\",\"#\",\" \",\"#\",\"#\",\"#\",\" \"]]}";
+
+    // Parse the JSON data
+    cJSON* root = cJSON_Parse(json_data);
+    if (root == NULL) {
+        printf("Error parsing JSON data.\n");
+        return 1;
+    }
+
+    // Access the "maze" array within the JSON data
+    cJSON* mazeArray = cJSON_GetObjectItem(root, "maze");
+
+    // Create a 2D character array to store the maze
+    char maze[MAZE_HEIGHT][MAZE_WIDTH];
+
+    // Initialize player position
+    int playerX = 0;
+    int playerY = 0;
+
+    // Fill the maze array with data from the JSON
+    for (int i = 0; i < cJSON_GetArraySize(mazeArray); i++) {
+        cJSON* rowArray = cJSON_GetArrayItem(mazeArray, i);
+        for (int j = 0; j < cJSON_GetArraySize(rowArray); j++) {
+            cJSON* cell = cJSON_GetArrayItem(rowArray, j);
+            maze[i][j] = cJSON_GetStringValue(cell)[0];
+        }
+    }
+
+    // Print the maze
+    for (int i = 0; i < MAZE_HEIGHT; i++) {
+        for (int j = 0; j < MAZE_WIDTH; j++) {
+            printf("%c ", maze[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Cleanup cJSON resources
+    cJSON_Delete(root);
+
+    return 0;
+}
+
