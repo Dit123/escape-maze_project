@@ -6,70 +6,188 @@
  */
 
 #include <stdio.h>
-#include "main.h"
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <ncurses.h>
+#include "escape_maps.h"
 
-int main() {
-    // Define the maze map as a 2D character array (10x10)
-    char map[10][10] = {
-        {'S', ' ', '#', '#', ' ', '#', ' ', ' ', ' ', 'E'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', '#', ' '},
-        {'#', ' ', '#', '#', ' ', ' ', ' ', ' ', ' ', ' '},
-        {'#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' '},
-        {'#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', ' '},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', '#', ' '},
-        {'#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {'#', ' ', '#', ' ', '#', '#', ' ', '#', ' ', ' '},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' '},
-        {'#', '#', '#', '#', '#', ' ', '#', '#', '#', ' '},
-    };
+// Define the size of the maze
+#define MAZE_WIDTH 10
+#define MAZE_HEIGHT 10
 
-    // Initialize player position
-    int playerX = 0;
-    int playerY = 0;
+// Define characters for maze elements
+#define WALL '#'
+#define PLAYER 'P'
+#define EXIT 'E'
+#define EMPTY ' '
 
-    // Initialize game mode (0: Playing, 1: Win, 2: Lose)
-    int mode = 0;
+// Define player position
+int playerX = 0;
+int playerY = 0;
 
-    while (mode == 0) {
-        // Print the maze
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                printf("%c ", map[i][j]);
+// Define maze variables
+char maze[MAZE_HEIGHT][MAZE_WIDTH];
+
+// Define game variables
+int score = 0;
+
+
+extern const char mazeMap1[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap2[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap3[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap4[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap5[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap6[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap7[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap8[MAZE_HEIGHT][MAZE_WIDTH];
+extern const char mazeMap9[MAZE_HEIGHT][MAZE_WIDTH];
+
+// Function to generate a random maze
+void generateMaze() {
+    // Initialize the maze with walls
+    for (int i = 0; i < MAZE_HEIGHT; i++) {
+        for (int j = 0; j < MAZE_WIDTH; j++) {
+            maze[i][j] = WALL;
+        }
+    }
+
+    // Create a path from the start to the exit (randomized)
+    int x = 0;
+    int y = 0;
+    maze[x][y] = EMPTY;
+
+    while (1) {
+        int direction = rand() % 4; // Randomly select a direction (0: Up, 1: Left, 2: Down, 3: Right)
+
+        // Move in the selected direction (if valid)
+        if (direction == 0 && x > 0 && maze[x - 1][y] == WALL) {
+            maze[--x][y] = EMPTY;
+        } else if (direction == 1 && y > 0 && maze[x][y - 1] == WALL) {
+            maze[x][--y] = EMPTY;
+        } else if (direction == 2 && x < MAZE_HEIGHT - 1 && maze[x + 1][y] == WALL) {
+            maze[++x][y] = EMPTY;
+        } else if (direction == 3 && y < MAZE_WIDTH - 1 && maze[x][y + 1] == WALL) {
+            maze[x][++y] = EMPTY;
+        } else {
+            // No valid directions to move, backtrack
+            int found = 0;
+            for (int i = 0; i < MAZE_HEIGHT; i++) {
+                for (int j = 0; j < MAZE_WIDTH; j++) {
+                    if (maze[i][j] == EMPTY) {
+                        x = i;
+                        y = j;
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found) break;
             }
-            printf("\n");
         }
 
-        // Check if the player has reached the exit
-        if (playerX == 9 && playerY == 9) {
-            mode = 1; // Player wins
+        if (x == MAZE_HEIGHT - 1 && y == MAZE_WIDTH - 1) {
+            // Reached the exit
+            maze[x][y] = EXIT;
             break;
         }
+    }
+}
 
-        // Prompt for direction
-        char direction;
-        printf("Enter a direction (W/A/S/D): ");
-        scanf(" %c", &direction);
+// Modify the printMaze function like this in both files
+void printMaze(const char map[10][10]) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            printf("%c ", map[i][j]);
+        }
+        printf("\n");
+    }
+}
 
-        // Update player position based on direction
-        if (direction == 'W' && playerX > 0 && map[playerX - 1][playerY] != '#') {
-            playerX--;
-        } else if (direction == 'A' && playerY > 0 && map[playerX][playerY - 1] != '#') {
-            playerY--;
-        } else if (direction == 'S' && playerX < 9 && map[playerX + 1][playerY] != '#') {
-            playerX++;
-        } else if (direction == 'D' && playerY < 9 && map[playerX][playerY + 1] != '#') {
-            playerY++;
-        } else {
-            printf("Invalid move! Try again.\n");
+// Function to move the player
+void movePlayer(char direction) {
+    int newX = playerX;
+    int newY = playerY;
+
+    if (direction == 'W' && playerX > 0 && maze[playerX - 1][playerY] != WALL) {
+        newX--;
+    } else if (direction == 'A' && playerY > 0 && maze[playerX][playerY - 1] != WALL) {
+        newY--;
+    } else if (direction == 'S' && playerX < MAZE_HEIGHT - 1 && maze[playerX + 1][playerY] != WALL) {
+        newX++;
+    } else if (direction == 'D' && playerY < MAZE_WIDTH - 1 && maze[playerX][playerY + 1] != WALL) {
+        newY++;
+    }
+
+    if (maze[newX][newY] == EXIT) {
+        // Player reached the exit, increase the score and generate a new maze
+        score += 10;
+        generateMaze();
+    } else if (maze[newX][newY] != WALL) {
+        // Valid move, update player position
+        playerX = newX;
+        playerY = newY;
+        score--;
+    }
+}
+
+void printMazeSize() {
+    printf("Maze Size: %dx%d\n", MAZE_WIDTH, MAZE_HEIGHT);
+}
+
+int main() {
+	// Define the maze map as a 2D character array (10x10)
+char map[10][10] = {
+    {'S', ' ', '#', '#', ' ', '#', ' ', ' ', ' ', 'E'},
+    {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', '#', ' '},
+    {'#', ' ', '#', '#', ' ', ' ', ' ', ' ', ' ', ' '},
+    {'#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' '},
+    {'#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', ' '},
+    {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', '#', ' '},
+    {'#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {'#', ' ', '#', ' ', '#', '#', ' ', '#', ' ', ' '},
+    {'#', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', ' '},
+    {'#', '#', '#', '#', '#', ' ', '#', '#', '#', ' '},
+};
+
+    // Seed the random number generator
+    srand(time(NULL));
+
+    // Initialize ncurses (for Linux)
+    initscr();
+    noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+
+    // Generate the initial maze and print it
+    generateMaze();
+    printMaze(maze);
+    printMazeSize();
+
+
+        memcpy(maze, mazeMap1, sizeof(maze));
+        memcpy(maze, mazeMap2, sizeof(maze));
+        memcpy(maze, mazeMap3, sizeof(maze));
+        memcpy(maze, mazeMap4, sizeof(maze));
+        memcpy(maze, mazeMap5, sizeof(maze));
+        memcpy(maze, mazeMap6, sizeof(maze));
+        memcpy(maze, mazeMap7, sizeof(maze));
+        memcpy(maze, mazeMap8, sizeof(maze));
+        memcpy(maze, mazeMap1, sizeof(maze));
+
+
+    char input;
+    while (1) {
+        input = getch();
+
+        if (input == 'W' || input == 'A' || input == 'S' || input == 'D') {
+            movePlayer(input);
+            printMaze(maze);
         }
     }
 
-    // Game result
-    if (mode == 1) {
-        printf("Congratulations! You escaped the maze!\n");
-    } else {
-        printf("Sorry, you lost the game.\n");
-    }
+    // End ncurses (for Linux)
+    endwin();
 
     return 0;
 }
+

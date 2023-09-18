@@ -3,15 +3,15 @@
 
 
 // Function prototypes for functions used in escape.c
-void initializeGame(int* playerX, int* playerY, int* mode);
-void printMaze(const char map[10][10]);
-int isGameComplete(int playerX, int playerY, int mode);
-void playEscapeGame(char map[10][10], int* playerX, int* playerY, int* mode);
+void generateMaze()
+void printMaze()
+void movePlayer(char direction)
+void printMazeSize()
+// Function prototypes for functions used in game_story.c
 
-// Function prototypes for functions used in the code
-void startGame();
-void showInstructions();
-void displayGameInfo();
-void exitGame();
 
+//Function prototypes for functions used in game_intro.c
+void displayIntroduction()
+void startGameStory()
+void displayGameEnding(int didWin)
 #endif // MAIN_H
