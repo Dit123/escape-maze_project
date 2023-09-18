@@ -31,7 +31,6 @@ char maze[MAZE_HEIGHT][MAZE_WIDTH];
 
 // Define game variables
 int score = 0;
-int selectedLevel = 1;
 
 #define NUM_LEVELS 3
 
@@ -54,40 +53,57 @@ void generateMaze(int level) {
         }
     }
 
-    // Choose the maze map based on the level
-    const char* selectedMazeMap;
-    switch (level) {
-        case 1:
-            selectedMazeMap = mazeMap1;
-            break;
-        case 2:
-            selectedMazeMap = mazeMap2;
-            break;
-        // Add more cases for additional levels
-        default:
-            selectedMazeMap = mazeMap1; // Default to level 1
-            break;
-    }
+    int x = 0;
+    int y = 0;
+    maze[x][y] = EMPTY;
 
-    / Copy the selected maze map into the maze array
+    while (1) {
+        int direction = rand() % 4; // Randomly select a direction (0: Up, 1: Left, 2: Down, 3: Right)
+
+        // Move in the selected direction (if valid)
+        if (direction == 0 && x > 0 && maze[x - 1][y] == WALL) {
+            maze[--x][y] = EMPTY;
+        } else if (direction == 1 && y > 0 && maze[x][y - 1] == WALL) {
+            maze[x][--y] = EMPTY;
+        } else if (direction == 2 && x < MAZE_HEIGHT - 1 && maze[x + 1][y] == WALL) {
+            maze[++x][y] = EMPTY;
+        } else if (direction == 3 && y < MAZE_WIDTH - 1 && maze[x][y + 1] == WALL) {
+            maze[x][++y] = EMPTY;
+        } else {
+		int found = 0;
+            for (int i = 0; i < MAZE_HEIGHT; i++) {
+                for (int j = 0; j < MAZE_WIDTH; j++) {
+                    if (maze[i][j] == EMPTY) {
+                        x = i;
+                        y = j;
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+        }
+
+	if (x == MAZE_HEIGHT - 1 && y == MAZE_WIDTH - 1) {
+            // Reached the exit
+            maze[x][y] = EXIT;
+            break;
+        }
+    }
+}
+
+// Function to print the maze
+void printMaze(const char map[MAZE_HEIGHT][MAZE_WIDTH]) {
     for (int i = 0; i < MAZE_HEIGHT; i++) {
         for (int j = 0; j < MAZE_WIDTH; j++) {
-            maze[i][j] = selectedMazeMap[i][j];
+            printw("%c ", map[i][j]); // Use printw instead of printf for ncurses
         }
+        printw("\n");
     }
+    refresh(); // Refresh the screen after printing
 }
 
-// Modify the printMaze function like this in both files
-void printMaze(const char map[10][10]) {
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            printf("%c ", map[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void movePlayer(char direction) {
+void movePlayer(char direction, int selectedLevel) {
     int newX = playerX;
     int newY = playerY;
 
@@ -102,10 +118,9 @@ void movePlayer(char direction) {
     }
 
     if (maze[newX][newY] == EXIT) {
-        // Player reached the exit, increase the score and move to the next level
+        // Player reached the exit, increase the score and generate a new maze
         score += 10;
-        selectedLevel++;
-        generateMaze();
+        generateMaze(selectedLevel); // Generate a new maze with the selected level
     } else if (maze[newX][newY] != WALL) {
         // Valid move, update player position
         playerX = newX;
@@ -143,10 +158,10 @@ char map[10][10] = {
     keypad(stdscr, TRUE);
 
     // Generate the initial maze and print it
-    generateMaze();
+    int selectedLevel = rand() % NUM_LEVELS + 1;
+    generateMaze(selectedLevel);
     printMaze(maze);
-    printMazeSize();
-
+    printMazeSize();	
 
         memcpy(maze, mazeMap1, sizeof(maze));
         memcpy(maze, mazeMap2, sizeof(maze));
@@ -160,14 +175,11 @@ char map[10][10] = {
 
 
     char input;
-    int level;
     while (1) {
-	    level = (rand() % NUM_LEVELS) + 1;
-	    generateMaze(selectedLevel);
         input = getch();
 
         if (input == 'W' || input == 'A' || input == 'S' || input == 'D') {
-            movePlayer(input);
+            movePlayer(input, selectedLevel);
             printMaze(maze);
         }
     }
