@@ -31,7 +31,9 @@ char maze[MAZE_HEIGHT][MAZE_WIDTH];
 
 // Define game variables
 int score = 0;
+int selectedLevel = 1;
 
+#define NUM_LEVELS 3
 
 extern const char mazeMap1[MAZE_HEIGHT][MAZE_WIDTH];
 extern const char mazeMap2[MAZE_HEIGHT][MAZE_WIDTH];
@@ -44,7 +46,7 @@ extern const char mazeMap8[MAZE_HEIGHT][MAZE_WIDTH];
 extern const char mazeMap9[MAZE_HEIGHT][MAZE_WIDTH];
 
 // Function to generate a random maze
-void generateMaze() {
+void generateMaze(int level) {
     // Initialize the maze with walls
     for (int i = 0; i < MAZE_HEIGHT; i++) {
         for (int j = 0; j < MAZE_WIDTH; j++) {
@@ -52,43 +54,25 @@ void generateMaze() {
         }
     }
 
-    // Create a path from the start to the exit (randomized)
-    int x = 0;
-    int y = 0;
-    maze[x][y] = EMPTY;
-
-    while (1) {
-        int direction = rand() % 4; // Randomly select a direction (0: Up, 1: Left, 2: Down, 3: Right)
-
-        // Move in the selected direction (if valid)
-        if (direction == 0 && x > 0 && maze[x - 1][y] == WALL) {
-            maze[--x][y] = EMPTY;
-        } else if (direction == 1 && y > 0 && maze[x][y - 1] == WALL) {
-            maze[x][--y] = EMPTY;
-        } else if (direction == 2 && x < MAZE_HEIGHT - 1 && maze[x + 1][y] == WALL) {
-            maze[++x][y] = EMPTY;
-        } else if (direction == 3 && y < MAZE_WIDTH - 1 && maze[x][y + 1] == WALL) {
-            maze[x][++y] = EMPTY;
-        } else {
-            // No valid directions to move, backtrack
-            int found = 0;
-            for (int i = 0; i < MAZE_HEIGHT; i++) {
-                for (int j = 0; j < MAZE_WIDTH; j++) {
-                    if (maze[i][j] == EMPTY) {
-                        x = i;
-                        y = j;
-                        found = 1;
-                        break;
-                    }
-                }
-                if (found) break;
-            }
-        }
-
-        if (x == MAZE_HEIGHT - 1 && y == MAZE_WIDTH - 1) {
-            // Reached the exit
-            maze[x][y] = EXIT;
+    // Choose the maze map based on the level
+    const char* selectedMazeMap;
+    switch (level) {
+        case 1:
+            selectedMazeMap = mazeMap1;
             break;
+        case 2:
+            selectedMazeMap = mazeMap2;
+            break;
+        // Add more cases for additional levels
+        default:
+            selectedMazeMap = mazeMap1; // Default to level 1
+            break;
+    }
+
+    / Copy the selected maze map into the maze array
+    for (int i = 0; i < MAZE_HEIGHT; i++) {
+        for (int j = 0; j < MAZE_WIDTH; j++) {
+            maze[i][j] = selectedMazeMap[i][j];
         }
     }
 }
@@ -103,7 +87,6 @@ void printMaze(const char map[10][10]) {
     }
 }
 
-// Function to move the player
 void movePlayer(char direction) {
     int newX = playerX;
     int newY = playerY;
@@ -119,8 +102,9 @@ void movePlayer(char direction) {
     }
 
     if (maze[newX][newY] == EXIT) {
-        // Player reached the exit, increase the score and generate a new maze
+        // Player reached the exit, increase the score and move to the next level
         score += 10;
+        selectedLevel++;
         generateMaze();
     } else if (maze[newX][newY] != WALL) {
         // Valid move, update player position
@@ -172,11 +156,14 @@ char map[10][10] = {
         memcpy(maze, mazeMap6, sizeof(maze));
         memcpy(maze, mazeMap7, sizeof(maze));
         memcpy(maze, mazeMap8, sizeof(maze));
-        memcpy(maze, mazeMap1, sizeof(maze));
+        memcpy(maze, mazeMap9, sizeof(maze));
 
 
     char input;
+    int level;
     while (1) {
+	    level = (rand() % NUM_LEVELS) + 1;
+	    generateMaze(selectedLevel);
         input = getch();
 
         if (input == 'W' || input == 'A' || input == 'S' || input == 'D') {
