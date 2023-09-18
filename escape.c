@@ -11,6 +11,7 @@
 #include <time.h>
 #include <ncurses.h>
 #include "escape_maps.h"
+#include "enemies.h"
 
 // Define the size of the maze
 #define MAZE_WIDTH 10
